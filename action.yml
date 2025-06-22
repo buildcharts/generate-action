@@ -1,0 +1,44 @@
+name: Generate BuildCharts
+description: Runs `buildcharts generate` using Docker
+branding:
+  icon: 'pie-chart'
+  color: 'yellow'
+runs:
+  using: composite
+  steps:
+    - name: Generate BuildCharts
+      uses: pyTooling/Actions/with-post-step@r0
+      with:
+        main: |
+          echo "::group::buildcharts install CLI"
+          dotnet tool install --global dotnet-buildcharts --version 0.0.3-beta.208
+          echo "::endgroup::"
+
+          echo "::group::buildcharts version"
+          buildcharts version
+          echo "::endgroup::"
+
+          echo "::group::buildcharts generate"
+          buildcharts generate
+          echo "::endgroup::"
+          
+          # echo "::group::buildcharts version"
+          # docker run --rm buildcharts/buildcharts:latest version
+          # echo "::endgroup::"
+
+          # echo "::group::buildcharts generate"
+          # docker run --rm -v "${GITHUB_WORKSPACE}:/src" -w /src -u "$(id -u):$(id -g)" buildcharts/buildcharts:latest generate
+          # echo "::endgroup::"
+
+          echo "::group::Inspect build.yml"
+          cat "${GITHUB_WORKSPACE}/build.yml"
+          echo "::endgroup::"
+
+          echo "::group::Inspect docker-bake.hcl"
+          cat "${GITHUB_WORKSPACE}/.buildcharts/docker-bake.hcl"
+          echo "::endgroup::"
+        post: |
+          echo "Removing .buildcharts folder..."
+          rm -rf "${GITHUB_WORKSPACE}/.buildcharts" || true
+
+        
